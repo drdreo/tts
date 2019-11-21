@@ -1,8 +1,8 @@
 # tts
 A PPT project
 
-Install ionic globally:
-* `npm install -g ionic`
+Install ionic & cordova globally:
+* `npm install -g ionic cordova`
 
 ### serve
 `ionic serve`

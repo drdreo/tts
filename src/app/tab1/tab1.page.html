@@ -7,22 +7,38 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-    <ion-button (click)="listPairedDevices()">
+    <ion-button (click)="scanDevices()">
         <ion-icon slot="start" name="refresh"></ion-icon>
-        Refresh Bluetooth Devices
+        Scan Bluetooth Devices
     </ion-button>
+    <!--    <ion-col>-->
+    <!--        <ion-list radio-group [(ngModel)]="pairedDeviceID" *ngIf="listToggle">-->
+    <!--            <ion-item *ngFor="let device of pairedList;let i=index">-->
+    <!--                <ion-label>{{device.name}}</ion-label>-->
+    <!--                <ion-radio value="{{i}}"></ion-radio>-->
+    <!--            </ion-item>-->
+    <!--        </ion-list>-->
+    <!--    </ion-col>-->
     <ion-col>
-        <ion-list radio-group [(ngModel)]="pairedDeviceID" *ngIf="listToggle">
-            <ion-item *ngFor="let device of pairedList;let i=index">
-                <ion-label>{{device.name}}</ion-label>
-                <ion-radio value="{{i}}"></ion-radio>
-            </ion-item>
+        <ion-list [(ngModel)]="pairedDeviceID" name="device" ngDefaultControl>
+
+            <ion-radio-group>
+                <ion-list-header>
+                    <ion-label>Devices</ion-label>
+                </ion-list-header>
+
+                <ion-item *ngFor="let device of pairableDevices">
+                    <ion-label>{{device.name}}</ion-label>
+                    <ion-radio slot="start" value="{{device.address}}" (ionSelect)="pairedDeviceID = device.address;"></ion-radio>
+                </ion-item>
+
+            </ion-radio-group>
+
         </ion-list>
     </ion-col>
-
-    <ion-button *ngIf="listToggle" (click)="selectDevice()">
+    <ion-button *ngIf="pairableDevices.length > 0" (click)="selectDevice()">
         <ion-icon slot="start" name="bluetooth"></ion-icon>
-        Connect Bluetooth Devices
+        Select
     </ion-button>
     <ion-list>
         <ion-item>
@@ -32,8 +48,8 @@
 
     </ion-list>
 
-    <ion-button color="medium" (click)="sendData()">
-        <ion-icon slot="start" name="send"></ion-icon>
-        Send Data Via Bluetooth
-    </ion-button>
+    <!--    <ion-button color="medium" (click)="sendData()">-->
+    <!--        <ion-icon slot="start" name="send"></ion-icon>-->
+    <!--        Send Data Via Bluetooth-->
+    <!--    </ion-button>-->
 </ion-content>

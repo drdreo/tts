@@ -1,5 +1,5 @@
 {
-  "name": "tts",
+  "name": "TTS",
   "version": "0.0.1",
   "author": "Andreas Hahn",
   "homepage": "https://ionicframework.com/",
@@ -9,7 +9,9 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build:ios": "ionic cordova build ios --verbose",
+    "build:android": "ionic cordova build android"
   },
   "private": true,
   "dependencies": {
@@ -19,12 +21,13 @@
     "@angular/platform-browser": "~8.1.2",
     "@angular/platform-browser-dynamic": "~8.1.2",
     "@angular/router": "~8.1.2",
-    "@ionic-native/bluetooth-serial": "^5.17.0",
+    "@ionic-native/bluetooth-le": "^5.17.0",
     "@ionic-native/core": "^5.0.0",
     "@ionic-native/splash-screen": "^5.0.0",
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic/angular": "^4.7.1",
-    "cordova-plugin-bluetooth-serial": "^0.4.7",
+    "cordova-ios": "^5.0.1",
+    "cordova-plugin-background-mode-bluetooth-central": "^1.0.0",
     "core-js": "^2.5.4",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
@@ -44,6 +47,12 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "~8.9.4",
     "codelyzer": "^5.0.0",
+    "cordova-plugin-device": "^2.0.2",
+    "cordova-plugin-ionic-keyboard": "^2.2.0",
+    "cordova-plugin-ionic-webview": "^4.1.3",
+    "cordova-plugin-splashscreen": "^5.0.2",
+    "cordova-plugin-statusbar": "^2.4.2",
+    "cordova-plugin-whitelist": "^1.3.3",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.1.0",
@@ -59,7 +68,17 @@
   "description": "An PPT project developed by Andreas Hahn, David Holzmann",
   "cordova": {
     "plugins": {
-      "cordova-plugin-bluetooth-serial": {}
-    }
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-ionic-webview": {},
+      "cordova-plugin-ionic-keyboard": {},
+      "cordova-plugin-bluetoothle": {},
+      "cordova-plugin-background-mode-bluetooth-central": {}
+    },
+    "platforms": [
+      "ios"
+    ]
   }
 }
