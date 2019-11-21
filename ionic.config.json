@@ -1,5 +1,7 @@
 {
   "name": "tts",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
