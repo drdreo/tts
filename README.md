@@ -4,5 +4,5 @@ A PPT project
 Install ionic globally:
 * `npm install -g ionic`
 
-###serve
+### serve
 `ionic serve`
