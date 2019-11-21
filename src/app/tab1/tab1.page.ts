@@ -88,7 +88,7 @@ const mockDevices = [{
 export class Tab1Page implements OnDestroy {
     listToggle: boolean;
     pairedList: PairedList;
-    pairableDevices: Device[] = mockDevices;
+    pairableDevices: Device[] = [];
 
     pairedDeviceID = '';
     dataSend = '';
