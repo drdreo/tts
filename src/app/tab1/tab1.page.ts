@@ -80,14 +80,39 @@ const mockDevices = [{
         address: '9F9B3D50-82E9-B118-2082-0E3D0ED6F081',
     }];
 
+const mockServiceSuccess: ServiceSuccess = {
+    status: 'services',
+    services: ['4FAFC201-1FB5-459E-8FCC-C5C9C331914B'],
+    name: 'BIERDECKEL',
+    address: 'EF2072DC-32E9-41BE-CA65-B1DCED74520E',
+};
+
+const mockCharacteristicsSuccess = {
+    status: 'characteristics',
+    characteristics: [
+        {
+            properties: {write: true, read: true},
+            uuid: 'BEB5483E-36E1-4688-B7F5-EA07361B26A8',
+        },
+    ],
+    name: 'BIERDECKEL',
+    service: '4FAFC201-1FB5-459E-8FCC-C5C9C331914B',
+    address: 'EF2072DC-32E9-41BE-CA65-B1DCED74520E',
+};
+
+interface ServiceSuccess {
+    'status': 'services';
+    'services': string[];
+    'name': string;
+    'address': string;
+}
+
 @Component({
     selector: 'app-tab1',
     templateUrl: 'tab1.page.html',
     styleUrls: ['tab1.page.scss'],
 })
 export class Tab1Page implements OnDestroy {
-    listToggle: boolean;
-    pairedList: PairedList;
     pairableDevices: Device[] = [];
 
     pairedDeviceID = '';
@@ -112,9 +137,27 @@ export class Tab1Page implements OnDestroy {
 
         this.bluetoothle.startScan(scanParams)
             .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((scanStatus) => {
+            .subscribe((scanStatus: any) => {
                 console.log(scanStatus);
-                this.pairableDevices.push({name: scanStatus.name, address: scanStatus.address});
+
+                if (scanStatus.address && !this.pairableDevices.some(device => device.address === scanStatus.address)) {
+                    let name = scanStatus.name;
+
+                    if (name.length === 0) {
+                        name = 'No name';
+                        if (scanStatus.advertisement && scanStatus.advertisement.localName && scanStatus.advertisement.localName.length) {
+                            name = scanStatus.advertisement.localName;
+                        }
+                    }
+                    console.log('adding device: ', {name, address: scanStatus.address});
+                    this.pairableDevices.push({name, address: scanStatus.address});
+                } else {
+                    console.log('Device address is undefined');
+                }
+
+                if (scanStatus.advertisement && scanStatus.advertisement.serviceUuids.some(uuid => uuid === '4FAFC201-1FB5-459E-8FCC-C5C9C331914B')) {
+                    this.showToast('Our Arduino was found!');
+                }
             }, (error) => {
                 this.showError(error);
             });
@@ -144,12 +187,77 @@ export class Tab1Page implements OnDestroy {
         // Attempt to connect device with specified address, call app.deviceConnected if success
         this.bluetoothle.connect({address})
             .subscribe((res) => {
-                this.showToast(`Successfully connected to ${res.name}!`);
+                this.deviceConnected(res.name);
             }, error => {
                 console.log(error);
                 this.showError('Error:Connecting to Device');
             });
     }
+
+    deviceConnected(deviceName: string) {
+
+        this.getDeviceServices(this.pairedDeviceID);
+
+        // Subscribe to data receiving as soon as the delimiter is read
+        // @ts-ignore
+        // this.bluetoothle.subscribe()
+        //     .subscribe(success => {
+        //         console.log(success);
+        //         this.handleData(success.value);
+        //         this.showToast(`Connected to [${deviceName}] successfully!`);
+        //     }, error => {
+        //         this.showError(error);
+        //     });
+    }
+
+    getDeviceServices(address: string) {
+        this.bluetoothle.services({address}).then((result: ServiceSuccess) => this.discoverSuccess(result, address));
+    }
+
+    discoverSuccess(result: ServiceSuccess, address: string) {
+        console.log('Discover returned with status: ' + result.status);
+        console.log(result);
+
+        this.bluetoothle.characteristics({
+            address,
+            service: result.services[0], // what SERVICE FUCKING ID
+            characteristics: [],
+        }).then(cResult => this.characteristicsSuccess(cResult));
+
+        if (result.status === 'services') {
+
+            // Create a chain of read promises so we don't try to read a property until we've finished
+            // reading the previous property.
+
+            // const readSequence = result.services.reduce((sequence, service) => {
+            //     return sequence.then(() => {
+            //         return addService(result.address, service.uuid, service.characteristics);
+            //     });
+            //
+            // }, Promise.resolve());
+
+            // Once we're done reading all the values, disconnect
+            // readSequence.then(() => {
+            //
+            //     new Promise((resolve, reject) => {
+            //
+            //         this.bluetoothle.disconnect(resolve, reject,
+            //             {address: result.address});
+            //
+            //     }).then(connectSuccess, handleError);
+            //
+            // });
+        }
+    }
+
+    characteristicsSuccess(result) {
+        console.log('Characterisitcs returned with status: ' + result.status);
+
+        console.log(result);
+        this.bluetoothle.subscribe({address: result.address, service: result.service, characteristic: result.characteristics[0].uuid})
+            .subscribe(console.log);
+    }
+
 
     // checkBluetoothEnabled() {
     //     this.bluetoothSerial.isEnabled().then(success => {
@@ -210,9 +318,7 @@ export class Tab1Page implements OnDestroy {
     //     this.showToast('Device Disconnected');
     // }
     //
-    // handleData(data) {
-    //     this.showToast(data);
-    // }
+
     //
     // sendData() {
     //     this.dataSend += '\n';
@@ -224,6 +330,10 @@ export class Tab1Page implements OnDestroy {
     //         this.showError(error);
     //     });
     // }
+
+    private handleData(data) {
+        this.showToast(data);
+    }
 
     private async showToast(message: string): Promise<void> {
         const toast = await this.toast.create({

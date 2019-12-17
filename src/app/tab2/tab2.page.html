@@ -1,23 +1,45 @@
 <ion-header>
     <ion-toolbar>
         <ion-title>
-            Table Service
+            Beer Checker BluetoothSerial
         </ion-title>
     </ion-toolbar>
 </ion-header>
 
+<ion-content class="ion-padding">
+    <ion-button expand="full" (click)="listPairedDevices()">
+        <ion-icon name="refresh"></ion-icon>&nbsp;Refresh Bluetooth Devices
+    </ion-button>
+    <ion-row>
+        <ion-col>
+            <ion-list ngDefaultControl [(ngModel)]="pairedDeviceID" *ngIf="listToggle">
 
-<ion-content>
-    <ion-card class="welcome-card">
-        <img src="/assets/beer.svg" alt=""/>
-        <ion-card-header>
-            <ion-card-subtitle>Get Started</ion-card-subtitle>
-            <ion-card-title>Welcome to Ionic</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <p>Now that your app has been created, you'll want to start building out features and components. Check out
-                some of the resources below for next steps.</p>
-        </ion-card-content>
-    </ion-card>
+                <ion-radio-group>
+                    <ion-list-header>
+                        <ion-label>Devices</ion-label>
+                    </ion-list-header>
 
+                    <ion-item *ngFor="let device of pairedList;let j=index">
+                        <ion-label>{{device.name}}</ion-label>
+                        <ion-radio value="{{j}}"></ion-radio>
+                    </ion-item>
+
+                </ion-radio-group>
+
+
+            </ion-list>
+        </ion-col>
+    </ion-row>
+    <ion-button expand="full" class="submit-button" *ngIf="listToggle" (click)="selectDevice()">
+        <ion-icon name="bluetooth"></ion-icon>&nbsp;Connect Bluetooth Devices
+    </ion-button>
+    <ion-list>
+        <ion-item>
+            <ion-label position="floating">Type The Data You want to Send</ion-label>
+            <ion-input type="text" name="datasend" [(ngModel)]="dataSend"></ion-input>
+        </ion-item>
+    </ion-list>
+    <ion-button expand="full" (click)="sendData()">
+        <ion-icon name="send"></ion-icon>&nbsp;Send Data Via Bluetooth
+    </ion-button>
 </ion-content>
