@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial/ngx';
-import { AlertController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 
 @Component({
     selector: 'app-tab2',
@@ -8,20 +8,17 @@ import { AlertController, NavController, ToastController } from '@ionic/angular'
     styleUrls: ['tab2.page.scss'],
 })
 export class Tab2Page {
-    pairedList: pairedlist;
-    listToggle = false;
+    pairedList: Pairedlist[];
     pairedDeviceID = 0;
     dataSend = '';
 
-    constructor(public navCtrl: NavController,
-                private alertCtrl: AlertController,
-                private bluetoothSerial: BluetoothSerial,
-                private toastCtrl: ToastController) {
+    constructor(private alertCtrl: AlertController, private toastCtrl: ToastController, private bluetoothSerial: BluetoothSerial) {
         this.checkBluetoothEnabled();
     }
 
     checkBluetoothEnabled() {
         this.bluetoothSerial.isEnabled().then(success => {
+            this.showToast('Listing devices...');
             this.listPairedDevices();
         }, error => {
             this.showError('Please Enable Bluetooth');
@@ -29,24 +26,24 @@ export class Tab2Page {
     }
 
     listPairedDevices() {
-        this.bluetoothSerial.list().then(success => {
-            console.log(success);
-            this.pairedList = success;
-            this.listToggle = true;
+        this.bluetoothSerial.list().then(list => {
+            console.log({list});
+            this.pairedList = list;
         }, error => {
             this.showError('Please Enable Bluetooth');
-            this.listToggle = false;
+            this.pairedList = [];
         });
     }
 
     selectDevice() {
         const connectedDevice = this.pairedList[this.pairedDeviceID];
+        console.log(connectedDevice);
+
         if (!connectedDevice.address) {
             this.showError('Select Paired Device to connect');
             return;
         }
 
-        console.log(connectedDevice);
         const address = connectedDevice.address;
         const name = connectedDevice.name;
 
@@ -57,7 +54,7 @@ export class Tab2Page {
         // Attempt to connect device with specified address, call app.deviceConnected if success
         this.bluetoothSerial.connect(address).subscribe(success => {
             this.deviceConnected();
-            this.showToast('Successfully Connected');
+            this.showToast('Successfully connected');
         }, error => {
             this.showError('Error:Connecting to Device');
         });
@@ -65,18 +62,19 @@ export class Tab2Page {
 
     deviceConnected() {
         // Subscribe to data receiving as soon as the delimiter is read
-        this.bluetoothSerial.subscribe('\n').subscribe(success => {
-            this.handleData(success);
-            this.showToast('Connected Successfullly');
-        }, error => {
-            this.showError(error);
-        });
+        this.bluetoothSerial.subscribe('\n')
+            .subscribe(data => {
+                this.handleData(data);
+                this.showToast(`Successfully subscribed to [${this.pairedList[this.pairedDeviceID].name}]`);
+            }, error => {
+                this.showError(error);
+            });
     }
 
     deviceDisconnected() {
         // Unsubscribe from data receiving
         this.bluetoothSerial.disconnect();
-        this.showToast('Device Disconnected');
+        this.showToast('Device disconnected');
     }
 
     handleData(data) {
@@ -87,33 +85,35 @@ export class Tab2Page {
         this.dataSend += '\n';
         this.showToast(this.dataSend);
 
-        this.bluetoothSerial.write(this.dataSend).then(success => {
-            this.showToast(success);
-        }, error => {
-            this.showError(error);
-        });
+        this.bluetoothSerial.write(this.dataSend)
+            .then(success => {
+                this.showToast(success);
+            }, error => {
+                this.showError(error);
+            });
     }
 
-    async showError(error) {
-        const alert = await this.alertCtrl.create({
-            header: 'Error',
-            subHeader: error,
-            buttons: ['Dismiss'],
-        });
-        await alert.present();
-    }
-
-    async showToast(msj) {
+    private async showToast(message: string): Promise<void> {
         const toast = await this.toastCtrl.create({
-            message: msj,
-            duration: 1000,
+            color: 'dark',
+            message,
+            duration: 3000,
         });
-        await toast.present();
+        return toast.present();
+    }
+
+    private async showError(message: string): Promise<void> {
+        const toast = await this.toastCtrl.create({
+            color: 'danger',
+            message,
+            showCloseButton: true,
+        });
+        return toast.present();
     }
 
 }
 
-interface pairedlist {
+interface Pairedlist {
     'class': number;
     'id': string;
     'address': string;

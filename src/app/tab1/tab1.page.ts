@@ -124,7 +124,17 @@ export class Tab1Page implements OnDestroy {
     constructor(private toast: ToastController,
                 private alertCtrl: AlertController,
                 public bluetoothle: BluetoothLE) {
-        // this.checkBluetoothEnabled();
+
+        const params = {
+            request: true,
+            statusReceiver: false,
+            restoreKey: 'bluetoothleplugin',
+        };
+
+        this.bluetoothle.initialize(params)
+            .subscribe(ble => {
+                console.log('ble', ble.status); // logs 'enabled'
+            });
     }
 
     ngOnDestroy(): void {
@@ -159,6 +169,7 @@ export class Tab1Page implements OnDestroy {
                     this.showToast('Our Arduino was found!');
                 }
             }, (error) => {
+                console.log(error);
                 this.showError(error);
             });
 
@@ -251,85 +262,15 @@ export class Tab1Page implements OnDestroy {
     }
 
     characteristicsSuccess(result) {
-        console.log('Characterisitcs returned with status: ' + result.status);
+        console.log('Characteristics returned with status: ' + result.status);
 
         console.log(result);
         this.bluetoothle.subscribe({address: result.address, service: result.service, characteristic: result.characteristics[0].uuid})
-            .subscribe(console.log);
+            .subscribe(data => {
+                console.log(data);
+                this.handleData(data);
+            });
     }
-
-
-    // checkBluetoothEnabled() {
-    //     this.bluetoothSerial.isEnabled().then(success => {
-    //         this.listPairedDevices();
-    //     }, error => {
-    //         console.log(error);
-    //         this.showError('Enable Bluetooth, hoe!');
-    //     });
-    // }
-    //
-    // private listPairedDevices() {
-    //     this.bluetoothSerial.list()
-    //         .then(list => {
-    //             this.pairedList = list;
-    //             this.listToggle = true;
-    //         }, error => {
-    //             this.showError('Enable Bluetooth, hoe!');
-    //             this.listToggle = false;
-    //         });
-    // }
-    //
-    // selectDevice() {
-    //     const connectedDevice = this.pairedList[this.pairedDeviceID];
-    //     if (!connectedDevice.address) {
-    //         this.showError('Select Paired Device to connect');
-    //         return;
-    //     }
-    //     const address = connectedDevice.address;
-    //     const name = connectedDevice.name;
-    //
-    //     this.connect(address);
-    // }
-    //
-    // connect(address) {
-    //     // Attempt to connect device with specified address, call app.deviceConnected if success
-    //     this.bluetoothSerial.connect(address).subscribe(success => {
-    //         this.deviceConnected();
-    //         this.showToast('Successfully connected!');
-    //     }, error => {
-    //         this.showError('Error:Connecting to Device');
-    //     });
-    // }
-    //
-    // deviceConnected() {
-    //     // Subscribe to data receiving as soon as the delimiter is read
-    //     this.bluetoothSerial.subscribe('\n')
-    //         .subscribe(success => {
-    //             this.handleData(success);
-    //             this.showToast('Connected Device successfullly!');
-    //         }, error => {
-    //             this.showError(error);
-    //         });
-    // }
-    //
-    // deviceDisconnected() {
-    //     // Unsubscribe from data receiving
-    //     this.bluetoothSerial.disconnect();
-    //     this.showToast('Device Disconnected');
-    // }
-    //
-
-    //
-    // sendData() {
-    //     this.dataSend += '\n';
-    //     this.showToast(this.dataSend);
-    //
-    //     this.bluetoothSerial.write(this.dataSend).then(success => {
-    //         this.showToast(success);
-    //     }, error => {
-    //         this.showError(error);
-    //     });
-    // }
 
     private handleData(data) {
         this.showToast(data);
@@ -337,17 +278,19 @@ export class Tab1Page implements OnDestroy {
 
     private async showToast(message: string): Promise<void> {
         const toast = await this.toast.create({
+            color: 'dark',
             message,
-            duration: 1000,
+            duration: 3000,
         });
         return toast.present();
     }
 
     private async showError(message: string): Promise<void> {
-        const alert = await this.alertCtrl.create({
+        const toast = await this.toast.create({
+            color: 'danger',
             message,
-            buttons: ['Dismiss'],
+            showCloseButton: true,
         });
-        return alert.present();
+        return toast.present();
     }
 }

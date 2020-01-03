@@ -8,8 +8,6 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
-import { BluetoothSerial } from '@ionic-native/bluetooth-serial/ngx';
 
 @NgModule({
     declarations: [AppComponent],
@@ -18,8 +16,6 @@ import { BluetoothSerial } from '@ionic-native/bluetooth-serial/ngx';
     providers: [
         StatusBar,
         SplashScreen,
-        BluetoothLE,
-        BluetoothSerial,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy},
     ],
     bootstrap: [AppComponent],

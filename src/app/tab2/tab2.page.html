@@ -8,12 +8,12 @@
 
 <ion-content class="ion-padding">
     <ion-button expand="full" (click)="listPairedDevices()">
-        <ion-icon name="refresh"></ion-icon>&nbsp;Refresh Bluetooth Devices
+        <ion-icon name="refresh"></ion-icon>
+        Refresh Bluetooth Devices
     </ion-button>
     <ion-row>
         <ion-col>
-            <ion-list ngDefaultControl [(ngModel)]="pairedDeviceID" *ngIf="listToggle">
-
+            <ion-list ngDefaultControl [(ngModel)]="pairedDeviceID" *ngIf="pairedList.length > 0">
                 <ion-radio-group>
                     <ion-list-header>
                         <ion-label>Devices</ion-label>
@@ -25,13 +25,12 @@
                     </ion-item>
 
                 </ion-radio-group>
-
-
             </ion-list>
         </ion-col>
     </ion-row>
-    <ion-button expand="full" class="submit-button" *ngIf="listToggle" (click)="selectDevice()">
-        <ion-icon name="bluetooth"></ion-icon>&nbsp;Connect Bluetooth Devices
+    <ion-button expand="full" class="submit-button" *ngIf="pairedList.length > 0" (click)="selectDevice()">
+        <ion-icon name="bluetooth"></ion-icon>
+        Connect Bluetooth Device
     </ion-button>
     <ion-list>
         <ion-item>
@@ -40,6 +39,7 @@
         </ion-item>
     </ion-list>
     <ion-button expand="full" (click)="sendData()">
-        <ion-icon name="send"></ion-icon>&nbsp;Send Data Via Bluetooth
+        <ion-icon name="send"></ion-icon>
+        Send Data Via Bluetooth
     </ion-button>
 </ion-content>
