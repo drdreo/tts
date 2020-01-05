@@ -1,7 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
 import { AlertController, ToastController } from '@ionic/angular';
-import { scan, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 interface PairedList {
@@ -116,13 +116,13 @@ export class Tab1Page implements OnDestroy {
     pairableDevices: Device[] = [];
 
     pairedDeviceID = '';
-    dataSend = '';
-
+    pressureData = 0;
 
     private unsubscribe$ = new Subject();
 
     constructor(private toast: ToastController,
                 private alertCtrl: AlertController,
+                private _zone: NgZone,
                 public bluetoothle: BluetoothLE) {
 
         const params = {
@@ -140,6 +140,9 @@ export class Tab1Page implements OnDestroy {
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
+
+        this.bluetoothle.disconnect({address: this.pairedDeviceID});
+        this.bluetoothle.close({address: this.pairedDeviceID});
     }
 
     scanDevices() {
@@ -160,7 +163,9 @@ export class Tab1Page implements OnDestroy {
                         }
                     }
                     console.log('adding device: ', {name, address: scanStatus.address});
-                    this.pairableDevices.push({name, address: scanStatus.address});
+                    this._zone.run(() => {
+                        this.pairableDevices.push({name, address: scanStatus.address});
+                    });
                 } else {
                     console.log('Device address is undefined');
                 }
@@ -169,14 +174,14 @@ export class Tab1Page implements OnDestroy {
                     this.showToast('Our Arduino was found!');
                 }
             }, (error) => {
-                console.log(error);
-                this.showError(error);
+                this.showError(error.message);
             });
 
         // auto stop scanning after 5s
         setTimeout(() => {
+            console.log('Stopping scanning!');
             this.bluetoothle.stopScan();
-        }, 5000);
+        }, 30000);
     }
 
     selectDevice() {
@@ -190,35 +195,24 @@ export class Tab1Page implements OnDestroy {
         //
         // const address = device.address;
         // const name = device.name;
-
+        this.bluetoothle.stopScan();
         this.connect(address);
     }
 
     connect(address) {
         // Attempt to connect device with specified address, call app.deviceConnected if success
         this.bluetoothle.connect({address})
+            .pipe(takeUntil(this.unsubscribe$))
             .subscribe((res) => {
-                this.deviceConnected(res.name);
+                this.deviceConnected();
             }, error => {
                 console.log(error);
                 this.showError('Error:Connecting to Device');
             });
     }
 
-    deviceConnected(deviceName: string) {
-
+    deviceConnected() {
         this.getDeviceServices(this.pairedDeviceID);
-
-        // Subscribe to data receiving as soon as the delimiter is read
-        // @ts-ignore
-        // this.bluetoothle.subscribe()
-        //     .subscribe(success => {
-        //         console.log(success);
-        //         this.handleData(success.value);
-        //         this.showToast(`Connected to [${deviceName}] successfully!`);
-        //     }, error => {
-        //         this.showError(error);
-        //     });
     }
 
     getDeviceServices(address: string) {
@@ -234,42 +228,26 @@ export class Tab1Page implements OnDestroy {
             service: result.services[0], // what SERVICE FUCKING ID
             characteristics: [],
         }).then(cResult => this.characteristicsSuccess(cResult));
-
-        if (result.status === 'services') {
-
-            // Create a chain of read promises so we don't try to read a property until we've finished
-            // reading the previous property.
-
-            // const readSequence = result.services.reduce((sequence, service) => {
-            //     return sequence.then(() => {
-            //         return addService(result.address, service.uuid, service.characteristics);
-            //     });
-            //
-            // }, Promise.resolve());
-
-            // Once we're done reading all the values, disconnect
-            // readSequence.then(() => {
-            //
-            //     new Promise((resolve, reject) => {
-            //
-            //         this.bluetoothle.disconnect(resolve, reject,
-            //             {address: result.address});
-            //
-            //     }).then(connectSuccess, handleError);
-            //
-            // });
-        }
     }
 
     characteristicsSuccess(result) {
         console.log('Characteristics returned with status: ' + result.status);
-
         console.log(result);
-        this.bluetoothle.subscribe({address: result.address, service: result.service, characteristic: result.characteristics[0].uuid})
-            .subscribe(data => {
-                console.log(data);
-                this.handleData(data);
-            });
+
+        setInterval(() => {
+            this.bluetoothle.read({address: result.address, service: result.service, characteristic: result.characteristics[0].uuid})
+                .then((res) => {
+                    console.log('reading...');
+                    console.log(res);
+                    // Turn the base64 string into an array of unsigned 8bit integers
+                    const decoded = atob(res.value);
+                    this._zone.run(() => {
+                        // tslint:disable-next-line:radix
+                        this.pressureData = minMax(parseInt(decoded), 4000, 0);
+                    });
+                    this.handleData(decoded);
+                });
+        }, 1000);
     }
 
     private handleData(data) {
@@ -293,4 +271,8 @@ export class Tab1Page implements OnDestroy {
         });
         return toast.present();
     }
+}
+
+function minMax(val, max, min) {
+    return Math.floor((val - min) / (max - min) * 100);
 }

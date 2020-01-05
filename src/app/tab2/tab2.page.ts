@@ -26,6 +26,14 @@ export class Tab2Page {
     }
 
     listPairedDevices() {
+        this.bluetoothSerial.available()
+            .then(() => {
+                this.bluetoothSerial.read()
+                    .then((data: any) => {
+                        console.log(data);
+                    });
+            });
+
         this.bluetoothSerial.list().then(list => {
             console.log({list});
             this.pairedList = list;
@@ -51,10 +59,11 @@ export class Tab2Page {
     }
 
     connect(address) {
+        console.log('trying to connect...');
         // Attempt to connect device with specified address, call app.deviceConnected if success
         this.bluetoothSerial.connect(address).subscribe(success => {
+            this.showToast('Connected: ' + success.status);
             this.deviceConnected();
-            this.showToast('Successfully connected');
         }, error => {
             this.showError('Error:Connecting to Device');
         });

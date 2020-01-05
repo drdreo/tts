@@ -1,0 +1,19 @@
+.beer{
+  width: 150px;
+  position:relative;
+
+  img{
+    width:100%;
+    position: relative;
+  }
+
+  .filler{
+    background-color: yellow;
+    width: 50px;
+    height: 50%;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+  }
+}
