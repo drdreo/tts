@@ -8,6 +8,7 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
 
 @NgModule({
     declarations: [AppComponent],
@@ -17,6 +18,7 @@ import { AppComponent } from './app.component';
         StatusBar,
         SplashScreen,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy},
+        BluetoothLE,
     ],
     bootstrap: [AppComponent],
 })

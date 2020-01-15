@@ -1,45 +1,54 @@
 <ion-header>
     <ion-toolbar>
         <ion-title>
-            Beer Checker BluetoothSerial
+            Table Service
         </ion-title>
     </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-    <ion-button expand="full" (click)="listPairedDevices()">
-        <ion-icon name="refresh"></ion-icon>
-        Refresh Bluetooth Devices
+    <ion-button (click)="scanDevices()">
+        <ion-icon slot="start" name="refresh"></ion-icon>
+        Scan Bluetooth Devices
     </ion-button>
-    <ion-row>
-        <ion-col>
-            <ion-list ngDefaultControl [(ngModel)]="pairedDeviceID" *ngIf="pairedList.length > 0">
-                <ion-radio-group>
-                    <ion-list-header>
-                        <ion-label>Devices</ion-label>
-                    </ion-list-header>
 
-                    <ion-item *ngFor="let device of pairedList;let j=index">
-                        <ion-label>{{device.name}}</ion-label>
-                        <ion-radio value="{{j}}"></ion-radio>
-                    </ion-item>
+    <ion-col *ngIf="pairableDevices.length">
+        <ion-list [(ngModel)]="pairedDeviceID" name="device" ngDefaultControl>
 
-                </ion-radio-group>
-            </ion-list>
-        </ion-col>
-    </ion-row>
-    <ion-button expand="full" class="submit-button" *ngIf="pairedList.length > 0" (click)="selectDevice()">
-        <ion-icon name="bluetooth"></ion-icon>
-        Connect Bluetooth Device
+            <ion-radio-group>
+                <ion-list-header>
+                    <ion-label>Devices</ion-label>
+                </ion-list-header>
+
+                <ion-item *ngFor="let device of pairableDevices">
+                    <ion-label>{{device.name}}</ion-label>
+                    <ion-radio slot="start" value="{{device.address}}"
+                               (ionSelect)="pairedDeviceID = device.address;"></ion-radio>
+                </ion-item>
+
+            </ion-radio-group>
+
+        </ion-list>
+    </ion-col>
+    <ion-button *ngIf="pairableDevices.length > 0" (click)="selectDevice()">
+        <ion-icon slot="start" name="bluetooth"></ion-icon>
+        Select
     </ion-button>
-    <ion-list>
-        <ion-item>
-            <ion-label position="floating">Type The Data You want to Send</ion-label>
-            <ion-input type="text" name="datasend" [(ngModel)]="dataSend"></ion-input>
-        </ion-item>
-    </ion-list>
-    <ion-button expand="full" (click)="sendData()">
-        <ion-icon name="send"></ion-icon>
-        Send Data Via Bluetooth
-    </ion-button>
+
+    <ion-grid>
+        <ion-row>
+            <ion-col size-md="3" size-xs="6" text-center>
+                <app-table-button title="Waiter" image="https://via.placeholder.com/150" [pressed]="buttonData.waiter"></app-table-button>
+            </ion-col>
+            <ion-col size-md="3" size-xs="6" text-center>
+                <app-table-button title="Drinks" image="https://via.placeholder.com/150" [pressed]="buttonData.drinks"></app-table-button>
+            </ion-col>
+            <ion-col size-md="3" size-xs="6" text-center>
+                <app-table-button title="Food" image="https://via.placeholder.com/150" [pressed]="buttonData.food"></app-table-button>
+            </ion-col>
+            <ion-col size-md="3" size-xs="6" text-center>
+                <app-table-button title="Pay" image="https://via.placeholder.com/150" [pressed]="buttonData.pay"></app-table-button>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
 </ion-content>

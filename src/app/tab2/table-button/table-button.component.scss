@@ -1,0 +1,7 @@
+.table-btn {
+  &.pressed {
+    ion-card-header {
+      background-color: coral;
+    }
+  }
+}
