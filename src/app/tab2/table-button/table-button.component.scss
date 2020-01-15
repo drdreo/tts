@@ -1,4 +1,8 @@
 .table-btn {
+  img{
+    max-width: 100px;
+    margin: auto;
+  }
   &.pressed {
     ion-card-header {
       background-color: coral;
