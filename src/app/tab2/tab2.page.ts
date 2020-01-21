@@ -64,10 +64,10 @@ export class Tab2Page implements OnDestroy {
                 console.log('ble', ble.status); // logs 'enabled'
             });
 
-        setInterval(() => {
-            // waiter:0;drinks:0;food:1;pay:1
-            this.buttonData = parseBtnData('waiter:0;drinks:0;food:1;pay:1');
-        }, 1000);
+        // setInterval(() => {
+        //     // waiter:0;drinks:0;food:1;pay:1
+        //     this.buttonData = parseBtnData('waiter:0;drinks:0;food:1;pay:1');
+        // }, 1000);
     }
 
     ngOnDestroy(): void {
@@ -177,7 +177,7 @@ export class Tab2Page implements OnDestroy {
                         // Turn the base64 string into an array of unsigned 8bit integers
                         this.buttonData = parseBtnData(decoded);
                     });
-                    this.handleData(decoded);
+                    //this.handleData(decoded);
                 });
         }, 1000);
     }

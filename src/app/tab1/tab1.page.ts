@@ -245,7 +245,7 @@ export class Tab1Page implements OnDestroy {
                         // tslint:disable-next-line:radix
                         this.pressureData = minMax(parseInt(decoded), 4000, 0);
                     });
-                    this.handleData(decoded);
+                  //  this.handleData(decoded);
                 });
         }, 1000);
     }
